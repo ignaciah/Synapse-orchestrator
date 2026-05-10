@@ -1,0 +1,148 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import { Activity, Brain, AlertTriangle, CheckCircle } from 'lucide-react';
+
+const API_URL = 'http://localhost:8000';
+
+function App() {
+  const [query, setQuery] = useState('');
+  const [patientId, setPatientId] = useState('patient-1');
+  const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const result = await axios.post(`${API_URL}/orchestrate`, {
+        query: query,
+        patient_id: patientId
+      });
+      setResponse(result.data);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to orchestrate query');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+        <div className="container mx-auto">
+          <h1 className="text-3xl font-bold">🧠 Synapse Orchestrator</h1>
+          <p className="text-blue-100">Multi-Agent Healthcare AI System</p>
+        </div>
+      </header>
+
+      <main className="container mx-auto p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Input Panel */}
+          <div className="lg:col-span-1 bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-4">Clinical Query</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Patient ID</label>
+                <select 
+                  value={patientId} 
+                  onChange={(e) => setPatientId(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                >
+                  <option>patient-1</option>
+                  <option>patient-2</option>
+                  <option>patient-3</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Query</label>
+                <textarea
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="e.g., Is patient ready for discharge? Is this medication safe?"
+                  className="w-full border rounded-lg p-2 h-32"
+                  required
+                />
+              </div>
+              
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white rounded-lg p-3 hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading ? '🧠 Orchestrating Agents...' : '🚀 Execute Clinical Decision'}
+              </button>
+            </form>
+          </div>
+
+          {/* Results Panel */}
+          <div className="lg:col-span-2 space-y-4">
+            {response && (
+              <>
+                {/* Decision Card */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Clinical Decision</h3>
+                      <div className="text-2xl font-bold">
+                        {response.answer === "Yes" ? (
+                          <span className="text-green-600">✅ Proceed with Care Plan</span>
+                        ) : response.answer === "No" ? (
+                          <span className="text-red-600">❌ Requires Immediate Review</span>
+                        ) : (
+                          <span className="text-yellow-600">⚠️ {response.answer}</span>
+                        )}
+                      </div>
+                    </div>
+                    {response.answer === "Yes" && <CheckCircle className="text-green-600 w-12 h-12" />}
+                    {response.answer === "No" && <AlertTriangle className="text-red-600 w-12 h-12" />}
+                    {response.answer === "Requires Review" && <Activity className="text-yellow-600 w-12 h-12" />}
+                  </div>
+                </div>
+
+                {/* Actions Taken */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <Brain className="mr-2" /> Agent Orchestration Trace
+                  </h3>
+                  <ul className="space-y-2">
+                    {response.actions_taken.map((action, idx) => (
+                      <li key={idx} className="text-sm text-gray-600 border-l-4 border-blue-400 pl-3">
+                        {action}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Reasoning Trace */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-3">🧬 Clinical Reasoning</h3>
+                  {response.reasoning_trace.map((step, idx) => (
+                    <details key={idx} className="mb-3">
+                      <summary className="cursor-pointer font-medium text-blue-600">
+                        Step {idx + 1}: {step.step}
+                      </summary>
+                      <div className="mt-2 p-3 bg-gray-50 rounded text-sm">
+                        <pre className="whitespace-pre-wrap">
+                          {JSON.stringify(step.output || step.result, null, 2)}
+                        </pre>
+                        {step.reasoning && (
+                          <p className="mt-2 text-gray-700 italic">{step.reasoning}</p>
+                        )}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default App;
+
