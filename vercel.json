@@ -1,0 +1,17 @@
+{
+  "framework": null,
+  "experimentalServices": {
+    "frontend": {
+      "entrypoint": "frontend",
+      "routePrefix": "/"
+    },
+    "orchestrator": {
+      "entrypoint": "backend/main.py",
+      "routePrefix": "/api"
+    },
+    "medtools": {
+      "entrypoint": "medtools/main.py",
+      "routePrefix": "/medtools"
+    }
+  }
+}
