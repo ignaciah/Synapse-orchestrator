@@ -39,3 +39,14 @@ The Problem hospitals face an interoperability paradox. While EHRs (Epic/Cerner 
 │  └─────────────────────────┘   └──────────────────────────┘  │
 └──────────────────────────────────────────────────────────────┘
 
+your-repo/
+├── frontend/          # Your Next.js app
+│   ├── package.json
+│   └── ...
+├── backend/           # Your FastAPI A2A Orchestrator
+│   ├── main.py
+│   ├── requirements.txt
+│   └── ...
+└── vercel.json
+
+
